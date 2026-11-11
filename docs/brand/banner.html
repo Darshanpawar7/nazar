@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nazar banner</title>
+    <style>
+      @font-face {
+        font-family: 'Bricolage';
+        src: url('../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2')
+          format('woff2');
+        font-weight: 200 800;
+      }
+      @font-face {
+        font-family: 'Mono';
+        src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2')
+          format('woff2');
+        font-weight: 100 800;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      .board {
+        position: relative;
+        width: 1280px;
+        height: 640px;
+        overflow: hidden;
+        background: #070b14;
+        color: #e6ecf8;
+        font-family: 'Bricolage', sans-serif;
+      }
+      .copy {
+        position: absolute;
+        left: 80px;
+        top: 64px;
+      }
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .mark img {
+        width: 60px;
+        height: 60px;
+      }
+      h1 {
+        margin: 34px 0 0;
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 0.98;
+        letter-spacing: -0.04em;
+      }
+      h1 em {
+        color: #9cc3ff;
+        font-style: normal;
+      }
+      p {
+        margin: 22px 0 0;
+        color: #8a97b1;
+        font-family: 'Mono', monospace;
+        font-size: 18px;
+      }
+      .shot {
+        position: absolute;
+        left: 80px;
+        right: 80px;
+        top: 330px;
+        height: 360px;
+        border: 1px solid #2a3a5c;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0b1222;
+      }
+      .shot img {
+        position: absolute;
+        left: 0;
+        top: -48px;
+        width: 1120px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="copy">
+        <div class="mark"><img src="logo.svg" alt="" /> nazar</div>
+        <h1>Keep an eye on <em>your streams.</em></h1>
+        <p>streaming anomaly detection · TypeScript · zero dependencies</p>
+      </div>
+      <div class="shot"><img src="../screenshots/monitor.png" alt="" /></div>
+    </div>
+  </body>
+</html>

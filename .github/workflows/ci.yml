@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type-check
+        run: npm run typecheck
+      - name: Unit and property tests with coverage
+        run: npm test
+      - name: Build the package
+        run: npm run build
+      - name: Pack and check the package from import and require
+        run: |
+          npm pack
+          mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y > /dev/null
+          npm i "$GITHUB_WORKSPACE"/nazar-js-*.tgz
+          node --input-type=module -e "import { cusum } from 'nazar-js'; if (!cusum().update(1)) process.exit(1)"
+          node -e "const { hampel } = require('nazar-js'); if (!hampel().update(1)) process.exit(1)"
+      - name: Build the site
+        run: npm run site:build
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Browser and accessibility tests
+        run: npm run e2e
+      - name: Keep the Playwright report when something fails
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
