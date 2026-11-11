@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--csp-->
+    <meta name="referrer" content="no-referrer" />
+    <title>Nazar · streaming anomaly detection in TypeScript</title>
+    <meta
+      name="description"
+      content="Nazar is a small, zero-dependency TypeScript library that spots the wrong reading in a live sensor stream: spikes, slow leaks, drift, stuck sensors and readings wrong for the time of day."
+    />
+    <meta name="theme-color" content="#070B14" />
+    <meta property="og:title" content="Nazar · keep an eye on your streams" />
+    <meta
+      property="og:description"
+      content="Streaming anomaly detection for sensor data. Zero dependencies, constant memory, state that survives a cold start."
+    />
+    <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <script src="%BASE_URL%boot.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="wrap top__in">
+        <a class="brand" href="#top" aria-label="Nazar, back to the top">
+          <svg class="eye" viewBox="0 0 40 40" aria-hidden="true">
+            <circle cx="20" cy="20" r="19" fill="#2F5BFF" />
+            <circle cx="20.6" cy="19.4" r="13" fill="#F4F7FF" />
+            <circle cx="21.2" cy="18.9" r="8.6" fill="#9CC3FF" />
+            <circle cx="21.7" cy="18.5" r="4.4" fill="#0B1020" />
+          </svg>
+          <span>nazar</span>
+        </a>
+        <nav aria-label="Sections">
+          <ul>
+            <li><a href="#detectors">Detectors</a></li>
+            <li><a href="#playground">Playground</a></li>
+            <li><a href="#guide">Guide</a></li>
+            <li><a href="#api">API</a></li>
+            <li><a href="https://github.com/Darshanpawar7/nazar">GitHub</a></li>
+          </ul>
+        </nav>
+        <button class="theme" type="button" id="theme" aria-label="Switch to the light theme">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" />
+            <path
+              d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+            />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="wrap hero__copy">
+          <p class="kicker">A TypeScript library · zero dependencies · MIT</p>
+          <h1 id="hero-title">Keep an eye on <em>your streams.</em></h1>
+          <p class="lede">
+            Nazar spots the wrong reading in a live sensor stream, one value at a time, in constant memory. It catches
+            spikes, slow leaks, drift, stuck sensors and readings that are wrong for the time of day. Its state is plain
+            JSON, so it survives a serverless cold start.
+          </p>
+          <div class="install">
+            <code id="install-cmd">npm i nazar-js</code>
+            <button type="button" class="copy" data-copy="#install-cmd">Copy</button>
+          </div>
+          <p class="note">
+            Not on npm yet. Until the first release, install from the release tarball (see the README).
+          </p>
+        </div>
+        <figure class="monitor wrap" aria-labelledby="hero-caption">
+          <div class="monitor__bar">
+            <span class="monitor__title">FLOW · main line · L/min</span>
+            <span class="monitor__live" id="hero-status">live</span>
+            <button type="button" class="monitor__play" id="hero-play">Pause</button>
+          </div>
+          <canvas
+            id="hero-canvas"
+            class="monitor__canvas"
+            role="img"
+            aria-label="A live chart of a simulated water-flow sensor. The detector's expected band is drawn around the signal, and anomalies are ringed in red."
+          ></canvas>
+          <ol class="monitor__log" id="hero-log" aria-live="polite" aria-label="Detected anomalies"></ol>
+          <figcaption id="hero-caption">
+            A simulated flow sensor watched by <code>ensemble([hampel(), cusum()])</code>. Bursts and slow leaks are
+            injected every few seconds.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="section" id="detectors" aria-labelledby="detectors-title">
+        <div class="wrap">
+          <h2 id="detectors-title">Pick the right detector</h2>
+          <p class="section__lede">
+            No single test catches everything. A spike detector misses a slow leak; a shift detector is slow to notice a
+            spike. Each one below is shown on the kind of trouble it was made for, with the readings it flagged ringed
+            in red.
+          </p>
+          <div class="cards" id="cards"></div>
+          <table class="also">
+            <caption>
+              Also included
+            </caption>
+            <tbody>
+              <tr>
+                <th scope="row"><code>range({ min, max })</code></th>
+                <td>Physically impossible readings: a negative flow, a humidity of 140%.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>rateOfChange({ maxDelta })</code></th>
+                <td>Impossible jumps between readings, per reading or per second for irregular sampling.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>ensemble([...])</code>, <code>persist(d)</code></th>
+                <td>
+                  Combine detectors by any, all or majority vote; raise the alarm only after several anomalous readings
+                  in a row.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section section--panel" id="playground" aria-labelledby="playground-title">
+        <div class="wrap">
+          <h2 id="playground-title">Playground</h2>
+          <p class="section__lede">
+            Pick a scenario and a detector, move the sliders, and see what it catches. Click the chart to add a spike of
+            your own.
+          </p>
+          <div class="play">
+            <form class="play__controls" id="controls" aria-label="Playground settings">
+              <div class="field">
+                <label for="scenario">Scenario</label>
+                <select id="scenario"></select>
+                <p class="field__hint" id="story"></p>
+              </div>
+              <div class="field">
+                <label for="detector">Detector</label>
+                <select id="detector"></select>
+              </div>
+              <div id="params" class="params"></div>
+              <div class="field field--row">
+                <label for="persist">Alarm after</label>
+                <input type="range" id="persist" min="1" max="10" step="1" value="1" />
+                <output for="persist" id="persist-out">1 reading</output>
+              </div>
+              <button type="button" class="ghost" id="reset-spikes">Remove my spikes</button>
+            </form>
+            <div class="play__stage">
+              <canvas
+                id="play-canvas"
+                class="play__canvas"
+                role="img"
+                aria-label="The scenario's readings, the detector's expected band, the true anomalies shaded, and the flagged readings ringed."
+              ></canvas>
+              <dl class="metrics" id="metrics" aria-live="polite"></dl>
+              <div class="tabs" role="tablist" aria-label="Result views">
+                <button type="button" role="tab" id="tab-legend" aria-selected="true" aria-controls="panel-legend">
+                  Legend
+                </button>
+                <button type="button" role="tab" id="tab-code" aria-selected="false" aria-controls="panel-code">
+                  Code
+                </button>
+              </div>
+              <div class="panel" role="tabpanel" id="panel-legend" aria-labelledby="tab-legend">
+                <ul class="legend">
+                  <li><i class="swatch swatch--signal"></i>Readings</li>
+                  <li><i class="swatch swatch--band"></i>What the detector expected</li>
+                  <li><i class="swatch swatch--truth"></i>Where the real anomalies are</li>
+                  <li><i class="swatch swatch--flag"></i>Flagged by the detector</li>
+                </ul>
+              </div>
+              <div class="panel" role="tabpanel" id="panel-code" aria-labelledby="tab-code" hidden>
+                <pre class="code"><code id="play-code"></code></pre>
+                <button type="button" class="copy copy--block" data-copy="#play-code">Copy code</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="guide" aria-labelledby="guide-title">
+        <div class="wrap guide">
+          <h2 id="guide-title">Guide</h2>
+          <article>
+            <h3>1. Every detector warms up first</h3>
+            <p>
+              A detector needs a little history before it knows what normal looks like. Until then
+              <code>verdict.ready</code> is false and it never raises an alarm, so the first readings of a new sensor
+              cannot page anyone.
+            </p>
+            <pre class="code"><code>const detector = zscore({ warmup: 20 });
+const verdict = detector.update(reading);
+if (verdict.ready &amp;&amp; verdict.anomaly) page(verdict);</code></pre>
+          </article>
+          <article>
+            <h3>2. Do not learn from the anomaly</h3>
+            <p>
+              A detector that keeps learning from what it flags will slowly accept a leak as the new normal. By default
+              Nazar leaves flagged readings out of its baseline. Set <code>adapt: 'always'</code> only when a lasting
+              change should become the new normal.
+            </p>
+            <pre class="code"><code>cusum();                      // adapt: 'normal-only', keeps reporting the leak
+cusum({ adapt: 'always' });   // follows the leak and goes quiet</code></pre>
+          </article>
+          <article>
+            <h3>3. Survive a cold start</h3>
+            <p>
+              In a serverless function every invocation starts from nothing. Save the snapshot after each reading and
+              restore it next time. Restoring is exact: the restored detector continues as if it had never stopped.
+            </p>
+            <pre class="code"><code>import { cusum, restore } from 'nazar-js';
+
+const saved = await kv.get('detector');
+const detector = saved ? restore(JSON.parse(saved)) : cusum();
+const verdict = detector.update(reading);
+await kv.put('detector', JSON.stringify(detector.snapshot()));</code></pre>
+          </article>
+          <article>
+            <h3>4. Choose thresholds with real numbers</h3>
+            <p>
+              <code>nazar-js/eval</code> scores a detector the way an operator feels it: by events, not readings. A leak
+              that lasts an hour is one event, caught or missed.
+            </p>
+            <pre class="code"><code>import { evaluate } from 'nazar-js/eval';
+import { waterFlowWithLeak } from 'nazar-js/synth';
+
+const data = waterFlowWithLeak();
+const flags = data.values.map(value =&gt; detector.update(value).anomaly);
+evaluate(flags, data.labels, { tolerance: 10 });
+// { precision, recall, f1, meanDelay, falseAlarms }</code></pre>
+          </article>
+          <article>
+            <h3>5. Combine detectors</h3>
+            <p>
+              Pair a spike detector with a shift detector, and wait for a few anomalous readings in a row before you
+              wake anyone up.
+            </p>
+            <pre class="code"><code>import { cusum, ensemble, hampel, persist } from 'nazar-js';
+
+const watch = persist(ensemble([hampel(), cusum()], { mode: 'any' }), { min: 3 });</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section--panel" id="api" aria-labelledby="api-title">
+        <div class="wrap">
+          <h2 id="api-title">API at a glance</h2>
+          <table class="api">
+            <thead>
+              <tr>
+                <th scope="col">Export</th>
+                <th scope="col">What it is</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">
+                  <code>zscore, hampel, cusum, pageHinkley, seasonal, flatline, range, rateOfChange</code>
+                </th>
+                <td>Detector factories. Each returns a <code>Detector</code>.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>detector.update(value, timestamp?)</code></th>
+                <td>
+                  Judges one reading and returns a <code>Verdict</code>: <code>anomaly</code>, <code>score</code>,
+                  <code>ready</code>, and when available <code>expected</code>, <code>lower</code>, <code>upper</code>,
+                  <code>reason</code>.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><code>detector.snapshot()</code>, <code>restore(snapshot)</code></th>
+                <td>Plain-JSON state, and a validating rebuild from it.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>ensemble(detectors, { mode })</code>, <code>persist(detector, { min })</code></th>
+                <td>Combinators, which are detectors themselves.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>nazar-js/synth</code></th>
+                <td>Seeded signals, anomaly injectors and four labelled scenarios.</td>
+              </tr>
+              <tr>
+                <th scope="row"><code>nazar-js/eval</code></th>
+                <td><code>evaluate(flags, labels)</code>: event-based precision, recall, F1 and detection delay.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap foot__in">
+        <p>Nazar is MIT licensed. Designed and built by <a href="https://darshanpawar7.github.io">Darshan Pawar</a>.</p>
+        <p><a href="https://github.com/Darshanpawar7/nazar">Source on GitHub</a></p>
+      </div>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
