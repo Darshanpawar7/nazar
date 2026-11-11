@@ -10,24 +10,35 @@ import type { Detector, Snapshot } from './types';
 
 type Revive = (config: unknown, state: unknown) => Detector;
 
-/** A map with no prototype, so a kind such as "__proto__" or "constructor" can never resolve to anything. */
-const DETECTORS: ReadonlyMap<string, Revive> = new Map(
-  [
-    zscoreCodec,
-    hampelCodec,
-    cusumCodec,
-    pageHinkleyCodec,
-    seasonalCodec,
-    flatlineCodec,
-    rangeCodec,
-    rateOfChangeCodec,
-  ].map(codec => [codec.kind, codec.revive] as const),
-);
+type Combine = (config: unknown, state: unknown, children: Detector[]) => Detector;
 
-const COMBINATORS: ReadonlyMap<string, (config: unknown, state: unknown, children: Detector[]) => Detector> = new Map([
-  ['ensemble', reviveEnsemble],
-  ['persist', revivePersist],
-]);
+let registry: { detectors: ReadonlyMap<string, Revive>; combinators: ReadonlyMap<string, Combine> } | null = null;
+
+/**
+ * Built on first use, so an app that imports one detector and never calls restore() does not ship the others.
+ * A Map, not an object, so a kind such as "__proto__" or "constructor" can never resolve to anything.
+ */
+function kinds(): NonNullable<typeof registry> {
+  registry ??= {
+    detectors: new Map(
+      [
+        zscoreCodec,
+        hampelCodec,
+        cusumCodec,
+        pageHinkleyCodec,
+        seasonalCodec,
+        flatlineCodec,
+        rangeCodec,
+        rateOfChangeCodec,
+      ].map(codec => [codec.kind, codec.revive] as const),
+    ),
+    combinators: new Map<string, Combine>([
+      ['ensemble', reviveEnsemble],
+      ['persist', revivePersist],
+    ]),
+  };
+  return registry;
+}
 
 /** Deeper trees than this are refused, so a hostile snapshot cannot exhaust the stack. */
 const MAX_DEPTH = 16;
@@ -41,10 +52,11 @@ function revive(value: unknown, depth: number): Detector {
   if (typeof kind !== 'string') throw new RangeError('restore: snapshot.kind must be a string');
   if (snapshot.version !== 1) throw new RangeError(`restore: unsupported snapshot version ${String(snapshot.version)}`);
 
-  const detector = DETECTORS.get(kind);
+  const { detectors, combinators } = kinds();
+  const detector = detectors.get(kind);
   if (detector) return detector(snapshot.config, snapshot.state);
 
-  const combinator = COMBINATORS.get(kind);
+  const combinator = combinators.get(kind);
   if (!combinator) throw new RangeError(`restore: unknown detector kind "${kind}"`);
   const children = snapshot.children;
   if (!Array.isArray(children) || children.length > MAX_CHILDREN) {

@@ -18,6 +18,8 @@ import { signal, spike } from '../src/synth';
 
 type Factory = () => Detector;
 
+const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
+
 const FACTORIES: ReadonlyArray<readonly [string, Factory]> = [
   ['zscore', () => zscore({ warmup: 5 })],
   ['hampel', () => hampel({ window: 7 })],
@@ -50,7 +52,8 @@ describe('snapshot and restore', () => {
           const rest = values.slice(at);
           const fromOriginal = rest.map((value, index) => original.update(value, (at + index) * 1000));
           const fromRevived = rest.map((value, index) => revived.update(value, (at + index) * 1000));
-          expect(fromRevived).toEqual(fromOriginal);
+          // Compared as JSON: a snapshot is JSON, which has no negative zero, and -0 === 0 anyway.
+          expect(plain(fromRevived)).toEqual(plain(fromOriginal));
           expect(before.length).toBe(at);
         }),
         { numRuns: 60 },
