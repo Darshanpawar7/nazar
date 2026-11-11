@@ -1,0 +1,12 @@
+node_modules/
+dist/
+site-dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+*.tgz
+.DS_Store
+Thumbs.db
+.vscode/*
+.idea/

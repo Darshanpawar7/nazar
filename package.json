@@ -1,0 +1,107 @@
+{
+  "name": "nazar-js",
+  "version": "0.1.0",
+  "description": "Streaming anomaly detection for sensor and time-series data. Zero dependencies, constant memory, state that survives a cold start.",
+  "keywords": [
+    "anomaly-detection",
+    "streaming",
+    "time-series",
+    "sensor",
+    "iot",
+    "outlier-detection",
+    "change-detection",
+    "cusum",
+    "hampel",
+    "page-hinkley",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "Darshan P Pawar <darshanpawarworks@gmail.com> (https://darshanpawar7.github.io)",
+  "homepage": "https://darshanpawar7.github.io/nazar/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Darshanpawar7/nazar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Darshanpawar7/nazar/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./synth": {
+      "import": {
+        "types": "./dist/synth.d.ts",
+        "default": "./dist/synth.js"
+      },
+      "require": {
+        "types": "./dist/synth.d.cts",
+        "default": "./dist/synth.cjs"
+      }
+    },
+    "./eval": {
+      "import": {
+        "types": "./dist/eval.d.ts",
+        "default": "./dist/eval.js"
+      },
+      "require": {
+        "types": "./dist/eval.d.cts",
+        "default": "./dist/eval.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "site:dev": "vite --port 4102 --strictPort",
+    "site:build": "tsc --noEmit && vite build",
+    "site:preview": "vite preview --port 4202 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0 && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "bench": "node scripts/bench.mjs",
+    "e2e": "playwright test",
+    "screenshots": "node scripts/screenshots.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "fast-check": "^4.10.2",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.0",
+    "tsup": "^9.0.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
