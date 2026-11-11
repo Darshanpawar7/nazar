@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { EwStats, gaussian, medianOfSorted, mulberry32, RollingMedian, Welford } from '../src/stats';
+import { EwStats, gaussian, madOfSorted, medianOfSorted, mulberry32, RollingMedian, Welford } from '../src/stats';
 
 const finite = fc.double({ min: -1e6, max: 1e6, noNaN: true, noDefaultInfinity: true });
 
@@ -84,6 +84,18 @@ describe('RollingMedian', () => {
         },
       ),
     );
+  });
+
+  it('finds the median absolute deviation without sorting, exactly as sorting would', () => {
+    fc.assert(
+      fc.property(fc.array(finite, { minLength: 1, maxLength: 101 }), values => {
+        const sorted = [...values].sort((a, b) => a - b);
+        const centre = medianOfSorted(sorted);
+        const slow = medianOfSorted(sorted.map(value => Math.abs(value - centre)).sort((a, b) => a - b));
+        expect(madOfSorted(sorted, centre)).toBe(slow);
+      }),
+    );
+    expect(Number.isNaN(madOfSorted([], 0))).toBe(true);
   });
 
   it('computes the median absolute deviation, and reloads from saved values', () => {

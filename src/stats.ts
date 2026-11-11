@@ -127,6 +127,35 @@ export function medianOfSorted(sorted: readonly number[]): number {
 }
 
 /**
+ * The median absolute deviation of a sorted array from `centre`, in O(n) with no allocation.
+ *
+ * Walking outwards from the centre, the distances below it and above it each only grow, so the sorted list of
+ * all distances is the merge of two sorted walks, and its middle element is found while merging.
+ */
+export function madOfSorted(sorted: readonly number[], centre: number): number {
+  const n = sorted.length;
+  if (n === 0) return Number.NaN;
+  let above = lowerBound(sorted, centre);
+  let below = above - 1;
+  const half = n >>> 1;
+  let previous = 0;
+  let current = 0;
+  for (let step = 0; step <= half; step++) {
+    const down = below >= 0 ? centre - (sorted[below] as number) : Infinity;
+    const up = above < n ? (sorted[above] as number) - centre : Infinity;
+    previous = current;
+    if (down <= up) {
+      current = down;
+      below -= 1;
+    } else {
+      current = up;
+      above += 1;
+    }
+  }
+  return n % 2 === 1 ? current : (previous + current) / 2;
+}
+
+/**
  * The median of the last `capacity` values. Keeps a sorted copy alongside the arrival order, so each update
  * costs O(capacity) and reading the median costs O(1).
  */
@@ -161,9 +190,7 @@ export class RollingMedian {
 
   /** Median absolute deviation from the median, unscaled. */
   mad(): number {
-    const centre = this.median;
-    const deviations = this.sorted.map(value => Math.abs(value - centre)).sort((a, b) => a - b);
-    return medianOfSorted(deviations);
+    return madOfSorted(this.sorted, this.median);
   }
 
   values(): readonly number[] {
