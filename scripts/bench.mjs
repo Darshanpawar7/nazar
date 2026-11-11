@@ -1,7 +1,18 @@
 // Updates per second for each detector, measured on the built package.
 //   npm run build && npm run bench
 import { cpus } from 'node:os';
-import { cusum, ensemble, flatline, hampel, pageHinkley, persist, range, rateOfChange, seasonal, zscore } from '../dist/index.js';
+import {
+  cusum,
+  ensemble,
+  flatline,
+  hampel,
+  pageHinkley,
+  persist,
+  range,
+  rateOfChange,
+  seasonal,
+  zscore,
+} from '../dist/index.js';
 import { waterFlowWithLeak } from '../dist/synth.js';
 
 const READINGS = 2_000_000;
